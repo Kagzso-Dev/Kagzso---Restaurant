@@ -1,0 +1,235 @@
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+    LogOut, LayoutDashboard, Monitor, Utensils, ChefHat,
+    Layers, Coffee, Grid, Settings, ClipboardList, ChevronLeft,
+    ChevronRight, X
+} from 'lucide-react';
+
+/**
+ * Adaptive Sidebar
+ *
+ * Props:
+ *   collapsed          – boolean (tablet icon-only mode)
+ *   onToggleCollapse   – fn to toggle collapsed
+ *   onClose            – fn to close drawer on mobile
+ */
+const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
+    const { user, logout, settings } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login', { replace: true });
+    };
+
+    if (!user) return null;
+
+    const isActive = (path) => location.pathname === path;
+
+    const handleNav = (path) => {
+        navigate(path);
+        // Close drawer on mobile after navigation
+        if (onClose) onClose();
+    };
+
+    /* ── NavItem ─────────────────────────────────────────────────────── */
+    const NavItem = ({ to, icon: Icon, label, color = 'text-gray-400', badge }) => {
+        const active = isActive(to);
+        return (
+            <button
+                onClick={() => handleNav(to)}
+                title={collapsed ? label : undefined}
+                className={`
+                    w-full flex items-center rounded-xl transition-all duration-200 group relative
+                    ${collapsed ? 'justify-center px-0 py-3' : 'space-x-3 px-4 py-3'}
+                    ${active
+                        ? 'bg-gradient-to-r from-orange-500/20 to-orange-600/5 text-white border-l-4 border-orange-500'
+                        : 'hover:bg-white/5 text-gray-400 hover:text-white border-l-4 border-transparent'
+                    }
+                `}
+            >
+                <Icon
+                    size={20}
+                    className={`flex-shrink-0 transition-colors ${active ? 'text-orange-400' : color} group-hover:text-white`}
+                />
+                {!collapsed && (
+                    <span className="font-medium text-sm tracking-wide truncate">{label}</span>
+                )}
+                {badge && !collapsed && (
+                    <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        {badge}
+                    </span>
+                )}
+                {/* Tooltip for collapsed mode */}
+                {collapsed && (
+                    <span className="
+                        absolute left-full ml-3 px-2 py-1 bg-gray-800 text-white text-xs
+                        rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100
+                        pointer-events-none transition-opacity shadow-lg border border-gray-700
+                        z-50
+                    ">
+                        {label}
+                    </span>
+                )}
+            </button>
+        );
+    };
+
+    /* ── Section Label ───────────────────────────────────────────────── */
+    const SectionLabel = ({ children }) => !collapsed ? (
+        <div className="px-4 pt-5 pb-1.5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+            {children}
+        </div>
+    ) : (
+        <div className="my-2 h-px bg-gray-800 mx-3" />
+    );
+
+    return (
+        <div className={`
+            h-full bg-[#0d1526] text-white flex flex-col
+            border-r border-gray-800/60 shadow-sidebar
+            transition-width duration-300 overflow-hidden
+        `}>
+
+            {/* ── Header ─────────────────────────────────────────────── */}
+            <div className={`flex items-center border-b border-gray-800/50 flex-shrink-0 ${collapsed ? 'justify-center p-4' : 'px-5 py-5 space-x-3'}`}>
+                {/* Logo / Brand */}
+                <div
+                    onClick={() => handleNav('/')}
+                    className="
+                        cursor-pointer w-11 h-11 flex-shrink-0 rounded-xl
+                        bg-gradient-to-br from-orange-500 to-red-600
+                        flex items-center justify-center font-black text-white text-lg
+                        shadow-glow-orange hover:scale-105 transition-transform
+                    "
+                >
+                    {settings?.restaurantName?.substring(0, 2).toUpperCase() || 'RS'}
+                </div>
+
+                {!collapsed && (
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-base font-bold tracking-wide text-white truncate leading-tight">
+                            {settings?.restaurantName || 'Restaurant'}
+                        </h1>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                            Management POS
+                        </p>
+                    </div>
+                )}
+
+                {/* Close button – visible only on mobile drawer */}
+                {!collapsed && onClose && (
+                    <button
+                        onClick={onClose}
+                        className="lg:hidden flex-shrink-0 p-1.5 text-gray-500 hover:text-white hover:bg-gray-700 rounded-lg"
+                        aria-label="Close menu"
+                    >
+                        <X size={18} />
+                    </button>
+                )}
+            </div>
+
+            {/* ── User Profile ────────────────────────────────────────── */}
+            {!collapsed && (
+                <div className="px-4 py-3 flex-shrink-0">
+                    <div className="bg-[#1a2744] rounded-xl p-3 border border-gray-700/40 flex items-center space-x-3">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0 ring-2 ring-gray-800">
+                            {user.username?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-bold text-white truncate">{user.username}</p>
+                            <p className="text-xs text-orange-400 font-medium capitalize truncate">{user.role}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {collapsed && (
+                <div className="flex justify-center py-3 flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold">
+                        {user.username?.charAt(0).toUpperCase()}
+                    </div>
+                </div>
+            )}
+
+            {/* ── Navigation ──────────────────────────────────────────── */}
+            <nav className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-2 pb-2">
+
+                {/* ADMIN LINKS */}
+                {user.role === 'admin' && (
+                    <>
+                        <SectionLabel>Admin Console</SectionLabel>
+                        <NavItem to="/admin" icon={LayoutDashboard} label="Dashboard" />
+                        <NavItem to="/admin/orders" icon={ClipboardList} label="Orders History" />
+                        <NavItem to="/admin/menu" icon={Coffee} label="Menu Items" />
+                        <NavItem to="/admin/categories" icon={Layers} label="Categories" />
+                        <NavItem to="/admin/tables" icon={Grid} label="Table Map" />
+                        <SectionLabel>System</SectionLabel>
+                        <NavItem to="/admin/settings" icon={Settings} label="Settings" />
+                    </>
+                )}
+
+                {/* OPERATIONS LINKS */}
+                {user.role !== 'admin' && (
+                    <>
+                        <SectionLabel>Operations</SectionLabel>
+
+                        {user.role === 'kitchen' && (
+                            <NavItem to="/kitchen" icon={ChefHat} label="Kitchen Display" color="text-orange-400" />
+                        )}
+
+                        {user.role === 'cashier' && (
+                            <>
+                                <NavItem to="/cashier" icon={Monitor} label="Cashier Point" color="text-green-400" />
+                                <NavItem to="/cashier/working-process" icon={ClipboardList} label="Working Process" color="text-blue-400" />
+                                <NavItem to="/cashier/kitchen-view" icon={ChefHat} label="Kitchen View" color="text-orange-400" />
+                            </>
+                        )}
+
+                        {user.role === 'waiter' && (
+                            <>
+                                <NavItem to="/waiter" icon={Utensils} label="Waiter Mode" color="text-pink-400" />
+                                <NavItem to="/waiter/working-process" icon={ClipboardList} label="Working Process" color="text-blue-400" />
+                                <NavItem to="/waiter/kitchen-view" icon={ChefHat} label="Kitchen View" color="text-orange-400" />
+                            </>
+                        )}
+                    </>
+                )}
+            </nav>
+
+            {/* ── Collapse Toggle (Desktop only) ──────────────────────── */}
+            {onToggleCollapse && (
+                <button
+                    onClick={onToggleCollapse}
+                    className="hidden lg:flex items-center justify-center p-3 border-t border-gray-800/50 text-gray-500 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
+                    title={collapsed ? 'Expand' : 'Collapse'}
+                >
+                    {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                </button>
+            )}
+
+            {/* ── Sign Out ─────────────────────────────────────────────── */}
+            <div className={`p-3 border-t border-gray-800/50 flex-shrink-0 ${collapsed ? 'flex justify-center' : ''}`}>
+                <button
+                    onClick={handleLogout}
+                    title={collapsed ? 'Sign Out' : undefined}
+                    className={`
+                        flex items-center justify-center gap-2.5
+                        bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white
+                        rounded-xl transition-all duration-200 border border-red-500/20
+                        group min-h-[44px]
+                        ${collapsed ? 'w-11 h-11 p-0' : 'w-full px-4 py-2.5'}
+                    `}
+                >
+                    <LogOut size={17} className="flex-shrink-0 transition-transform group-hover:-translate-x-0.5" />
+                    {!collapsed && <span className="font-semibold text-sm">Sign Out</span>}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default Sidebar;
