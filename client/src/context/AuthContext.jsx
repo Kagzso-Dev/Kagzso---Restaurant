@@ -1,10 +1,8 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api, { baseURL as API_BASE } from '../api';
 import { io } from 'socket.io-client';
 
 export const AuthContext = createContext();
-
-const API_BASE = 'http://localhost:5000';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -19,27 +17,15 @@ export const AuthProvider = ({ children }) => {
         gstNumber: '',
     });
 
-    // ── Axios default header ──────────────────────────────────────────────────
-    const setAuthHeader = (token, tenantId = null) => {
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        } else {
-            delete axios.defaults.headers.common['Authorization'];
-        }
-
-        if (tenantId) {
-            axios.defaults.headers.common['x-tenant-id'] = tenantId;
-        } else {
-            delete axios.defaults.headers.common['x-tenant-id'];
-        }
-    };
-
     // ── Socket init (joins branch-specific room) ──────────────────────────────
     const initSocket = useCallback((branchId) => {
-        const newSocket = io(API_BASE, { transports: ['websocket'] });
+        const newSocket = io(API_BASE, {
+            transports: ['websocket'],
+            withCredentials: true
+        });
+
         newSocket.on('connect', () => {
             if (branchId) {
-                // Join branch room for isolated real-time events
                 newSocket.emit('join-branch', branchId);
                 console.log('Joined branch room:', branchId);
             }
@@ -48,13 +34,12 @@ export const AuthProvider = ({ children }) => {
         return newSocket;
     }, []);
 
-    // ── Fetch settings (requires auth token) ─────────────────────────────────
+    // ── Fetch settings ────────────────────────────────────────────────────────
     const fetchSettings = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE}/api/settings`);
+            const res = await api.get('/api/settings');
             setSettings(res.data);
         } catch (error) {
-            // Settings fetch may fail before login — that's OK
             console.warn('Settings not loaded yet:', error.response?.status);
         }
     }, []);
@@ -69,31 +54,24 @@ export const AuthProvider = ({ children }) => {
             const savedTenantId = localStorage.getItem('selectedTenantId');
             if (savedTenantId && userData.role === 'superadmin') {
                 setSelectedTenantId(savedTenantId);
-                setAuthHeader(userData.token, savedTenantId);
-            } else {
-                setAuthHeader(userData.token);
             }
 
             initSocket(userData.branchId);
             fetchSettings();
         }
         setLoading(false);
-    }, []);
+    }, [initSocket, fetchSettings]);
 
     // ── Login ─────────────────────────────────────────────────────────────────
     const login = async (username, password) => {
         try {
-            const res = await axios.post(`${API_BASE}/api/auth/login`, { username, password });
+            const res = await api.post('/api/auth/login', { username, password });
             const userData = res.data;
 
             setUser(userData);
             localStorage.setItem('user', JSON.stringify(userData));
 
-            // Check if there was a previous session tenantId (optional, mostly clean state preferred)
-            setAuthHeader(userData.token);
             initSocket(userData.branchId);
-
-            // Fetch branch-specific settings after login
             fetchSettings();
 
             return userData;
@@ -108,7 +86,6 @@ export const AuthProvider = ({ children }) => {
         setSelectedTenantId(null);
         localStorage.removeItem('user');
         localStorage.removeItem('selectedTenantId');
-        setAuthHeader(null);
         if (socket) socket.disconnect();
         setSocket(null);
         setSettings({
@@ -128,7 +105,6 @@ export const AuthProvider = ({ children }) => {
         } else {
             localStorage.removeItem('selectedTenantId');
         }
-        setAuthHeader(user?.token, tenantId);
         window.location.reload();
     };
 
@@ -137,7 +113,6 @@ export const AuthProvider = ({ children }) => {
         return `${settings.currencySymbol}${(amount || 0).toFixed(2)}`;
     };
 
-    // Convenience getters from user object
     const tenantId = user?.tenantId || null;
     const branchId = user?.branchId || null;
     const role = user?.role || null;
@@ -154,7 +129,6 @@ export const AuthProvider = ({ children }) => {
             settings,
             fetchSettings,
             formatPrice,
-            // Multi-tenant context
             tenantId,
             branchId,
             role,
@@ -167,3 +141,4 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
+

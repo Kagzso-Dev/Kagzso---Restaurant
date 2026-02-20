@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { AuthContext } from '../../context/AuthContext';
 import { Trash2, Plus, Edit2 } from 'lucide-react';
 
@@ -16,7 +16,7 @@ const AdminCategories = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/categories');
+            const res = await api.get('/api/categories');
             setCategories(res.data);
         } catch (error) {
             console.error("Error fetching categories", error);
@@ -26,7 +26,7 @@ const AdminCategories = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this category?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/categories/${id}`, {
+            await api.delete(`/api/categories/${id}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setCategories(categories.filter(c => c._id !== id));
@@ -40,12 +40,12 @@ const AdminCategories = () => {
         e.preventDefault();
         try {
             if (editingCategory) {
-                const res = await axios.put(`http://localhost:5000/api/categories/${editingCategory._id}`, formData, {
+                const res = await api.put(`/api/categories/${editingCategory._id}`, formData, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setCategories(categories.map(c => c._id === editingCategory._id ? res.data : c));
             } else {
-                const res = await axios.post('http://localhost:5000/api/categories', formData, {
+                const res = await api.post('/api/categories', formData, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setCategories([...categories, res.data]);
@@ -136,3 +136,4 @@ const AdminCategories = () => {
 };
 
 export default AdminCategories;
+

@@ -34,3 +34,4 @@ const ViewToggle = ({ viewMode, setViewMode }) => {
 };
 
 export default ViewToggle;
+

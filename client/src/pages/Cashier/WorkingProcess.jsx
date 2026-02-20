@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api';
 import { Printer, ChefHat } from 'lucide-react';
 
 const WorkingProcess = () => {
@@ -10,7 +10,7 @@ const WorkingProcess = () => {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            const res = await axios.get('http://localhost:5000/api/orders', {
+            const res = await api.get('/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             // Filter active working process orders
@@ -249,3 +249,4 @@ const WorkingProcess = () => {
 };
 
 export default WorkingProcess;
+

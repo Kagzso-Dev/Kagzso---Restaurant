@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { AuthContext } from '../../context/AuthContext';
 import {
     Trash2, Plus, RotateCcw, Users, Lock, Clock,
@@ -152,7 +152,7 @@ const AdminTables = () => {
     const fetchTables = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:5000/api/tables', {
+            const res = await api.get('/api/tables', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setTables(res.data.sort((a, b) => parseInt(a.number) - parseInt(b.number)));
@@ -166,7 +166,7 @@ const AdminTables = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this table?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/tables/${id}`, {
+            await api.delete(`/api/tables/${id}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setTables(p => p.filter(t => t._id !== id));
@@ -178,7 +178,7 @@ const AdminTables = () => {
     const handleForceReset = async (id) => {
         if (!window.confirm('Force reset this table to Available?')) return;
         try {
-            const res = await axios.put(`http://localhost:5000/api/tables/${id}/force-reset`, {}, {
+            const res = await api.put(`/api/tables/${id}/force-reset`, {}, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setTables(p => p.map(t => t._id === id ? res.data.table : t));
@@ -189,7 +189,7 @@ const AdminTables = () => {
 
     const handleAddTable = async (formData) => {
         try {
-            const res = await axios.post('http://localhost:5000/api/tables', formData, {
+            const res = await api.post('/api/tables', formData, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setTables(p => [...p, res.data].sort((a, b) => parseInt(a.number) - parseInt(b.number)));
@@ -298,3 +298,4 @@ const AdminTables = () => {
 };
 
 export default AdminTables;
+

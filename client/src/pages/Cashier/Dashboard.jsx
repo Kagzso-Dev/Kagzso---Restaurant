@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 import {
     Printer, Banknote, ChefHat, CheckCircle,
     ShoppingBag, RefreshCw, ArrowLeft, X
@@ -130,7 +130,7 @@ const CashierDashboard = () => {
     /* ── Fetch Orders ────────────────────────────────────────────────── */
     const fetchOrders = useCallback(async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/orders', {
+            const res = await api.get('/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             // Update: data is now paginated object
@@ -170,8 +170,8 @@ const CashierDashboard = () => {
 
         setPaymentProcessing(true);
         try {
-            await axios.put(
-                `http://localhost:5000/api/orders/${selectedOrder._id}/payment`,
+            await api.put(
+                `/api/orders/${selectedOrder._id}/payment`,
                 { paymentMethod: 'cash', amountPaid: selectedOrder.finalAmount },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -397,3 +397,4 @@ const CashierDashboard = () => {
 };
 
 export default CashierDashboard;
+

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api';
 import { ChefHat, Clock, RefreshCw, CheckCheck, Utensils, XCircle } from 'lucide-react';
 import CancelOrderModal from '../../components/CancelOrderModal';
 
@@ -191,7 +191,7 @@ const KitchenDashboard = () => {
 
     const fetchOrders = useCallback(async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/orders', {
+            const res = await api.get('/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setOrders(res.data.orders || []);
@@ -250,7 +250,7 @@ const KitchenDashboard = () => {
 
     const updateStatus = async (orderId, newStatus) => {
         try {
-            await axios.put(`http://localhost:5000/api/orders/${orderId}/status`,
+            await api.put(`/api/orders/${orderId}/status`,
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -259,7 +259,7 @@ const KitchenDashboard = () => {
 
     const updateItemStatus = async (orderId, itemId, newStatus) => {
         try {
-            await axios.put(`http://localhost:5000/api/orders/${orderId}/items/${itemId}/status`,
+            await api.put(`/api/orders/${orderId}/items/${itemId}/status`,
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -270,11 +270,11 @@ const KitchenDashboard = () => {
         try {
             const isItem = arg3 !== undefined;
             const url = isItem
-                ? `http://localhost:5000/api/orders/${orderId}/items/${arg2}/cancel`
-                : `http://localhost:5000/api/orders/${orderId}/cancel`;
+                ? `/api/orders/${orderId}/items/${arg2}/cancel`
+                : `/api/orders/${orderId}/cancel`;
             const reason = isItem ? arg3 : arg2;
 
-            await axios.put(url, { reason }, {
+            await api.put(url, { reason }, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
         } catch (err) {
@@ -409,3 +409,4 @@ const KitchenDashboard = () => {
 };
 
 export default KitchenDashboard;
+

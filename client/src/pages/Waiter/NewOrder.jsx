@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 import {
     Search, ShoppingCart, ArrowLeft, ArrowRight,
     Utensils, Package, ChevronLeft, ChevronRight,
@@ -44,8 +44,8 @@ const NewOrder = () => {
             try {
                 setLoading(true);
                 const [menuRes, catRes] = await Promise.all([
-                    axios.get('http://localhost:5000/api/menu'),
-                    axios.get('http://localhost:5000/api/categories')
+                    api.get('/api/menu'),
+                    api.get('/api/categories')
                 ]);
                 setMenuItems(menuRes.data);
                 setCategories(catRes.data);
@@ -118,7 +118,7 @@ const NewOrder = () => {
         };
 
         try {
-            await axios.post('http://localhost:5000/api/orders', orderData, {
+            await api.post('/api/orders', orderData, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             navigate(user.role === 'waiter' ? '/waiter' : '/admin');
@@ -413,3 +413,4 @@ const NewOrder = () => {
 };
 
 export default NewOrder;
+

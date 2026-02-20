@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api';
 import {
     TrendingUp, ShoppingBag, Clock, DollarSign,
     Download, RefreshCw, ChevronDown
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:5000/api/orders', {
+            const res = await api.get('/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             // Update: res.data is now { orders, pagination }
@@ -300,3 +300,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api';
 import { Search, Filter, Eye, XCircle, ShoppingBag, History } from 'lucide-react';
 import OrderDetailsModal from '../../components/OrderDetailsModal';
 
@@ -14,7 +14,7 @@ const AdminOrders = () => {
 
     const fetchOrders = useCallback(async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/orders', {
+            const res = await api.get('/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setOrders(res.data.orders || []);
@@ -192,3 +192,4 @@ const AdminOrders = () => {
 };
 
 export default AdminOrders;
+

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api';
 import { ShieldCheck } from 'lucide-react'; // Using icons that look administrative
 
 const TenantSwitch = () => {
@@ -21,7 +21,7 @@ const TenantSwitch = () => {
             // although superAdminOnly middleware should handle it. 
             // Note: The global axios instance might have the header set if we already selected one.
             // But getting the list requires superadmin role, which we have.
-            const res = await axios.get('http://localhost:5000/api/superadmin/tenants');
+            const res = await api.get('/api/superadmin/tenants');
             setTenants(res.data);
         } catch (error) {
             console.error("Failed to load tenants", error);
@@ -65,3 +65,4 @@ const TenantSwitch = () => {
 };
 
 export default TenantSwitch;
+

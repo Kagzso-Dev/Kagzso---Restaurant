@@ -26,3 +26,4 @@ const Logo = ({ size = 'md', showText = true }) => {
 };
 
 export default Logo;
+

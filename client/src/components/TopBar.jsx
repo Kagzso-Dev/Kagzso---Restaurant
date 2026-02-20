@@ -150,3 +150,4 @@ const TopBar = ({ onMenuClick, sidebarCollapsed }) => {
 };
 
 export default TopBar;
+

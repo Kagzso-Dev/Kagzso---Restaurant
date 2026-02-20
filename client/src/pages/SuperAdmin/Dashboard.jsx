@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api';
 import { Users, Building, AlertCircle } from 'lucide-react';
 
 const SuperAdminDashboard = () => {
@@ -18,8 +18,8 @@ const SuperAdminDashboard = () => {
     const fetchData = async () => {
         try {
             const [tenantsRes, statsRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/superadmin/tenants'),
-                axios.get('http://localhost:5000/api/superadmin/stats')
+                api.get('/api/superadmin/tenants'),
+                api.get('/api/superadmin/stats')
             ]);
             setTenants(tenantsRes.data);
             setStats(statsRes.data);
@@ -148,3 +148,4 @@ const SuperAdminDashboard = () => {
 };
 
 export default SuperAdminDashboard;
+

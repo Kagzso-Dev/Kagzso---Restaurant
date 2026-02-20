@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
 import ViewToggle from '../../components/ViewToggle';
 import FoodItem from '../../components/FoodItem';
@@ -31,8 +31,8 @@ const AdminMenu = () => {
     const fetchData = async () => {
         try {
             const [menuRes, catRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/menu'),
-                axios.get('http://localhost:5000/api/categories')
+                api.get('/api/menu'),
+                api.get('/api/categories')
             ]);
             setItems(menuRes.data);
             setCategories(catRes.data);
@@ -44,7 +44,7 @@ const AdminMenu = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this item?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/menu/${id}`, {
+            await api.delete(`/api/menu/${id}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setItems(items.filter(i => i._id !== id));
@@ -57,12 +57,12 @@ const AdminMenu = () => {
         e.preventDefault();
         try {
             if (editingItem) {
-                const res = await axios.put(`http://localhost:5000/api/menu/${editingItem._id}`, formData, {
+                const res = await api.put(`/api/menu/${editingItem._id}`, formData, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setItems(items.map(i => i._id === editingItem._id ? res.data : i));
             } else {
-                const res = await axios.post('http://localhost:5000/api/menu', formData, {
+                const res = await api.post('/api/menu', formData, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setItems([...items, res.data]);
@@ -179,3 +179,4 @@ const AdminMenu = () => {
 };
 
 export default AdminMenu;
+

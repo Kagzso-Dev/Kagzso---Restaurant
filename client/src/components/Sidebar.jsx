@@ -233,3 +233,4 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
 };
 
 export default Sidebar;
+

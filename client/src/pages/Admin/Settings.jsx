@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { AuthContext } from '../../context/AuthContext';
 import { Save, Lock, Settings as SettingsIcon, DollarSign } from 'lucide-react';
 
@@ -51,7 +51,7 @@ const Settings = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.put('http://localhost:5000/api/settings', generalConfig, {
+            await api.put('/api/settings', generalConfig, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             await fetchSettings(); // Refresh context
@@ -77,7 +77,7 @@ const Settings = () => {
 
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/settings/change-password',
+            await api.post('/api/settings/change-password',
                 {
                     role: passwordData.role,
                     newPassword: passwordData.newPassword
@@ -233,3 +233,4 @@ const Settings = () => {
 };
 
 export default Settings;
+

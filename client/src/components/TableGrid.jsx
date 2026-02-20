@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { Clock, Users, Lock, Sparkles, AlertTriangle } from 'lucide-react';
 
@@ -59,7 +59,7 @@ const TableGrid = ({ onSelectTable, allowedStatuses = ['available'], showCleanAc
     useEffect(() => {
         const fetchTables = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/tables', {
+                const res = await api.get('/api/tables', {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setTables(res.data);
@@ -89,8 +89,8 @@ const TableGrid = ({ onSelectTable, allowedStatuses = ['available'], showCleanAc
         // If table is available and we need to reserve it first
         if (table.status === 'available' && user.role === 'waiter') {
             try {
-                const res = await axios.put(
-                    `http://localhost:5000/api/tables/${table._id}/reserve`,
+                const res = await api.put(
+                    `/api/tables/${table._id}/reserve`,
                     {},
                     { headers: { Authorization: `Bearer ${user.token}` } }
                 );
@@ -115,8 +115,8 @@ const TableGrid = ({ onSelectTable, allowedStatuses = ['available'], showCleanAc
     const handleCleanTable = async (e, table) => {
         e.stopPropagation();
         try {
-            await axios.put(
-                `http://localhost:5000/api/tables/${table._id}/clean`,
+            await api.put(
+                `/api/tables/${table._id}/clean`,
                 {},
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -212,3 +212,4 @@ const TableGrid = ({ onSelectTable, allowedStatuses = ['available'], showCleanAc
 };
 
 export default TableGrid;
+
