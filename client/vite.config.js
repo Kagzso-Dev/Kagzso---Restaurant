@@ -11,25 +11,38 @@ export default defineConfig(({ mode }) => ({
   },
 
   build: {
-    // ── Smaller chunks for better mobile caching ────────────────────────────
+    // ── Modern, stable build configuration ──────────────────────────────────
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React core — tiny, rarely changes
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // Heavy UI deps isolated so they cache separately
-          'vendor-ui': ['lucide-react', 'socket.io-client'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Group React core
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            // Group UI and other heavy utilities
+            if (id.includes('lucide-react') || id.includes('socket.io-client')) {
+              return 'vendor-ui';
+            }
+            // All other node_modules go to standard vendor chunk
+            return 'vendor';
+          }
         },
       },
     },
-    // No source maps in production (saves bandwidth on mobile)
+    // Production settings
     sourcemap: false,
-    // Target modern browsers; drops legacy polyfills
-    target: 'es2020',
+    chunkSizeWarningLimit: 1000,
+    target: 'esnext',
   },
 
-  // ── Drop console.* and debugger statements in production ──────────────────
+  // ── Production optimizations ──────────────────────────────────────────────
   esbuild: {
     drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
+
+  server: {
+    port: 5173,
+    host: true,
   },
 }));
