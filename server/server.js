@@ -53,7 +53,7 @@ app.use(express.json({ limit: '10kb' }));
 // Request logging — structured with timing
 app.use(logger.requestLogger);
 
-// Trust proxy (for rate limiter behind reverse proxy / Docker)
+// Trust proxy (required on Render — sits behind a reverse proxy)
 app.set('trust proxy', process.env.TRUST_PROXY || 1);
 
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
@@ -95,29 +95,6 @@ const io = new Server(server, {
     // Limit payload size to prevent abuse
     maxHttpBufferSize: 1e6, // 1 MB
 });
-
-// ── Redis Pub/Sub Adapter (for Multi-instance scaling) ───────────────────────
-if (process.env.REDIS_URL) {
-    (async () => {
-        try {
-            const { createClient } = require('redis');
-            const { createAdapter } = require('@socket.io/redis-adapter');
-
-            const pubClient = createClient({ url: process.env.REDIS_URL });
-            const subClient = pubClient.duplicate();
-
-            pubClient.on('error', (err) => logger.error('Redis PubClient Error', { error: err.message }));
-            subClient.on('error', (err) => logger.error('Redis SubClient Error', { error: err.message }));
-
-            await Promise.all([pubClient.connect(), subClient.connect()]);
-
-            io.adapter(createAdapter(pubClient, subClient));
-            logger.info('Socket.IO Redis adapter enabled (Horizontal scaling active)');
-        } catch (err) {
-            logger.error('Redis adapter initialization failed. Horizontal scaling disabled.', { error: err.message });
-        }
-    })();
-}
 
 // ─── Socket Authentication ───────────────────────────────────────────────────
 io.use(socketAuthMiddleware);
