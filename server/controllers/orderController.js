@@ -335,9 +335,11 @@ const processPayment = async (req, res) => {
 
         // Auto-Close: Payment triggers full completion
         order.paymentStatus = 'paid';
+        order.paymentMethod = paymentMethod || 'cash';
         order.orderStatus = 'completed';
         order.kotStatus = 'Closed';
         order.paymentAt = new Date();
+        order.paidAt = new Date();
         order.completedAt = order.completedAt || new Date();
 
         await order.save();

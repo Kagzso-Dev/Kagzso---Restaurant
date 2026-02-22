@@ -63,6 +63,7 @@ const orderSchema = new mongoose.Schema({
     readyAt: { type: Date },
     completedAt: { type: Date },
     paymentAt: { type: Date },
+    paidAt: { type: Date },
 
     cancelledBy: { type: String, enum: ['WAITER', 'KITCHEN', 'ADMIN'] },
     cancelReason: { type: String },
