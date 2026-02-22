@@ -99,8 +99,8 @@ const AdminMenu = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 gap-4">
-                <h2 className="text-2xl font-bold text-white">Menu Management</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[var(--theme-bg-card2)] p-6 rounded-xl shadow-lg border border-[var(--theme-border)] gap-4">
+                <h2 className="text-2xl font-bold text-[var(--theme-text-main)]">Menu Management</h2>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
                     <button
@@ -135,39 +135,39 @@ const AdminMenu = () => {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-gray-800 p-8 rounded-xl w-full max-w-lg shadow-2xl border border-gray-700 animate-fade-in">
-                        <h3 className="text-xl font-bold text-white mb-6">{editingItem ? 'Edit Item' : 'Add New Item'}</h3>
+                    <div className="bg-[var(--theme-bg-card)] p-8 rounded-xl w-full max-w-lg shadow-2xl border border-[var(--theme-border)] animate-fade-in">
+                        <h3 className="text-xl font-bold text-[var(--theme-text-main)] mb-6">{editingItem ? 'Edit Item' : 'Add New Item'}</h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Name</label>
-                                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="w-full bg-gray-700 text-white rounded-lg p-2 border border-gray-600 focus:border-blue-500" />
+                                <label className="block text-sm text-[var(--theme-text-muted)] mb-1">Name</label>
+                                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="w-full bg-[var(--theme-bg-dark)] text-[var(--theme-text-main)] rounded-lg p-2 border border-[var(--theme-border)] focus:border-blue-500" />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Description</label>
-                                <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full bg-gray-700 text-white rounded-lg p-2 border border-gray-600 focus:border-blue-500" rows="2"></textarea>
+                                <label className="block text-sm text-[var(--theme-text-muted)] mb-1">Description</label>
+                                <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full bg-[var(--theme-bg-dark)] text-[var(--theme-text-main)] rounded-lg p-2 border border-[var(--theme-border)] focus:border-blue-500" rows="2"></textarea>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Price</label>
-                                    <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required className="w-full bg-gray-700 text-white rounded-lg p-2 border border-gray-600 focus:border-blue-500" />
+                                    <label className="block text-sm text-[var(--theme-text-muted)] mb-1">Price</label>
+                                    <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required className="w-full bg-[var(--theme-bg-dark)] text-[var(--theme-text-main)] rounded-lg p-2 border border-[var(--theme-border)] focus:border-blue-500" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Category</label>
-                                    <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full bg-gray-700 text-white rounded-lg p-2 border border-gray-600 focus:border-blue-500">
+                                    <label className="block text-sm text-[var(--theme-text-muted)] mb-1">Category</label>
+                                    <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full bg-[var(--theme-bg-dark)] text-[var(--theme-text-main)] rounded-lg p-2 border border-[var(--theme-border)] focus:border-blue-500">
                                         {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Image URL</label>
-                                <input type="text" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} className="w-full bg-gray-700 text-white rounded-lg p-2 border border-gray-600 focus:border-blue-500" />
+                                <label className="block text-sm text-[var(--theme-text-muted)] mb-1">Image URL</label>
+                                <input type="text" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} className="w-full bg-[var(--theme-bg-dark)] text-[var(--theme-text-main)] rounded-lg p-2 border border-[var(--theme-border)] focus:border-blue-500" />
                             </div>
                             <div className="flex items-center space-x-2">
-                                <input type="checkbox" checked={formData.isVeg} onChange={e => setFormData({ ...formData, isVeg: e.target.checked })} className="w-4 h-4 rounded bg-gray-700 border-gray-600" />
-                                <span className="text-white text-sm">Vegetarian</span>
+                                <input type="checkbox" checked={formData.isVeg} onChange={e => setFormData({ ...formData, isVeg: e.target.checked })} className="w-4 h-4 rounded bg-[var(--theme-bg-dark)] border-[var(--theme-border)]" />
+                                <span className="text-[var(--theme-text-main)] text-sm">Vegetarian</span>
                             </div>
                             <div className="flex justify-end space-x-3 mt-6">
-                                <button type="button" onClick={closeModal} className="px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">Cancel</button>
+                                <button type="button" onClick={closeModal} className="px-4 py-2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)] rounded-lg transition-colors">Cancel</button>
                                 <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold">Save</button>
                             </div>
                         </form>

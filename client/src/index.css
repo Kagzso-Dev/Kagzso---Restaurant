@@ -2,24 +2,128 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design Tokens ───────────────────────────────────────────────────────── */
+/* ─── Design Tokens (Default / Shared) ─────────────────────────────────── */
 :root {
+  /* Brand — never changes across themes */
   --primary: #f97316;
   --primary-dark: #ea580c;
-  --bg-deep: #0a0f1e;
-  --bg-dark: #0f172a;
-  --bg-card: #1e293b;
-  --bg-card2: #243048;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
   --info: #3b82f6;
+
+  /* Layout — never changes */
   --sidebar-w: 288px;
   --topbar-h: 64px;
   --bottomnav-h: 64px;
+
+  /* ── Theme-aware tokens (override per theme below) ─────────────── */
+  --theme-bg-deep: #0a0f1e;
+  --theme-bg-dark: #0f172a;
+  --theme-bg-card: #1e293b;
+  --theme-bg-card2: #243048;
+  --theme-bg-muted: #1a2744;
+  --theme-bg-hover: rgba(255, 255, 255, 0.05);
+  --theme-text-main: #f8fafc;
+  --theme-text-muted: #94a3b8;
+  --theme-text-subtle: #64748b;
+  --theme-text-inverse: #0f172a;
+  --theme-border: rgba(255, 255, 255, 0.08);
+  --theme-border-solid: #1e293b;
+  --theme-input-bg: #1e293b;
+  --theme-sidebar-bg: #0d1526;
+  --theme-topbar-bg: rgba(15, 23, 42, 0.9);
+  --theme-shadow: rgba(0, 0, 0, 0.4);
+  --theme-overlay: rgba(0, 0, 0, 0.6);
+  --theme-skeleton-a: #1e293b;
+  --theme-skeleton-b: #2d3f55;
+  --theme-scrollbar: #334155;
+  --theme-scrollbar-h: #475569;
+
+  /* Legacy aliases — kept for backward compat */
+  --bg-deep: var(--theme-bg-deep);
+  --bg-dark: var(--theme-bg-dark);
+  --bg-card: var(--theme-bg-card);
+  --bg-card2: var(--theme-bg-card2);
+  --text-main: var(--theme-text-main);
+  --text-muted: var(--theme-text-muted);
 }
+
+/* ─── Theme: Default (Blue-Black — existing design) ─────────────────────── */
+[data-theme="default"] {
+  --theme-bg-deep: #0a0f1e;
+  --theme-bg-dark: #0f172a;
+  --theme-bg-card: #1e293b;
+  --theme-bg-card2: #243048;
+  --theme-bg-muted: #1a2744;
+  --theme-bg-hover: rgba(255, 255, 255, 0.05);
+  --theme-text-main: #f8fafc;
+  --theme-text-muted: #94a3b8;
+  --theme-text-subtle: #64748b;
+  --theme-text-inverse: #0f172a;
+  --theme-border: rgba(255, 255, 255, 0.08);
+  --theme-border-solid: #1e293b;
+  --theme-input-bg: #1e293b;
+  --theme-sidebar-bg: #0d1526;
+  --theme-topbar-bg: rgba(15, 23, 42, 0.90);
+  --theme-shadow: rgba(0, 0, 0, 0.4);
+  --theme-overlay: rgba(0, 0, 0, 0.6);
+  --theme-skeleton-a: #1e293b;
+  --theme-skeleton-b: #2d3f55;
+  --theme-scrollbar: #334155;
+  --theme-scrollbar-h: #475569;
+}
+
+/* ─── Theme: Pure Dark (True Black) ─────────────────────────────────────── */
+[data-theme="dark"] {
+  --theme-bg-deep: #000000;
+  --theme-bg-dark: #0a0a0a;
+  --theme-bg-card: #141414;
+  --theme-bg-card2: #1c1c1c;
+  --theme-bg-muted: #121212;
+  --theme-bg-hover: rgba(255, 255, 255, 0.06);
+  --theme-text-main: #f1f5f9;
+  --theme-text-muted: #a0aab8;
+  --theme-text-subtle: #6b7280;
+  --theme-text-inverse: #000000;
+  --theme-border: rgba(255, 255, 255, 0.07);
+  --theme-border-solid: #1c1c1c;
+  --theme-input-bg: #1a1a1a;
+  --theme-sidebar-bg: #050505;
+  --theme-topbar-bg: rgba(10, 10, 10, 0.92);
+  --theme-shadow: rgba(0, 0, 0, 0.7);
+  --theme-overlay: rgba(0, 0, 0, 0.75);
+  --theme-skeleton-a: #141414;
+  --theme-skeleton-b: #222222;
+  --theme-scrollbar: #2a2a2a;
+  --theme-scrollbar-h: #3a3a3a;
+}
+
+/* ─── Theme: Light (Clean White) ────────────────────────────────────────── */
+[data-theme="light"] {
+  --theme-bg-deep: #f8fafc;
+  --theme-bg-dark: #ffffff;
+  --theme-bg-card: #ffffff;
+  --theme-bg-card2: #f1f5f9;
+  --theme-bg-muted: #f1f5f9;
+  --theme-bg-hover: rgba(0, 0, 0, 0.04);
+  --theme-text-main: #0f172a;
+  --theme-text-muted: #475569;
+  --theme-text-subtle: #94a3b8;
+  --theme-text-inverse: #ffffff;
+  --theme-border: rgba(15, 23, 42, 0.08);
+  --theme-border-solid: #e2e8f0;
+  --theme-input-bg: #f8fafc;
+  --theme-sidebar-bg: #ffffff;
+  --theme-topbar-bg: rgba(255, 255, 255, 0.9);
+  --theme-shadow: rgba(0, 0, 0, 0.05);
+  --theme-overlay: rgba(0, 0, 0, 0.4);
+  --theme-skeleton-a: #f1f5f9;
+  --theme-skeleton-b: #e2e8f0;
+  --theme-scrollbar: #cbd5e1;
+  --theme-scrollbar-h: #94a3b8;
+}
+
 
 /* ─── Base Reset ─────────────────────────────────────────────────────────── */
 *,
@@ -34,17 +138,20 @@
 html {
   overflow-x: hidden;
   scroll-behavior: smooth;
+  /* ── Smooth theme transitions ─────────────────────────────────── */
+  transition: background-color 0.25s ease, color 0.2s ease;
 }
 
 body {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  background-color: var(--bg-dark);
-  color: var(--text-main);
+  background-color: var(--theme-bg-dark);
+  color: var(--theme-text-main);
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.2s ease;
 }
 
 /* ─── Touch-Friendly Interactive Elements ───────────────────────────────── */
@@ -66,9 +173,9 @@ button.btn-xs {
 input,
 select,
 textarea {
-  background-color: var(--bg-card);
-  border: 1px solid #334155;
-  color: var(--text-main);
+  background-color: var(--theme-input-bg);
+  border: 1px solid var(--theme-border-solid);
+  color: var(--theme-text-main);
   padding: 0.75rem;
   border-radius: 10px;
   width: 100%;
@@ -76,7 +183,7 @@ textarea {
   font-family: inherit;
   font-size: 16px;
   /* Prevents iOS zoom on focus */
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.25s, color 0.2s;
 }
 
 input:focus,
@@ -97,12 +204,12 @@ textarea:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--theme-scrollbar);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--theme-scrollbar-h);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -110,7 +217,7 @@ textarea:focus {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--theme-scrollbar);
   border-radius: 999px;
 }
 
@@ -204,9 +311,9 @@ textarea:focus {
 /* ─── Skeleton Loader ────────────────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(90deg,
-      #1e293b 25%,
-      #2d3f55 50%,
-      #1e293b 75%);
+      var(--theme-skeleton-a) 25%,
+      var(--theme-skeleton-b) 50%,
+      var(--theme-skeleton-a) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -371,4 +478,134 @@ body.drawer-open {
 .page-container {
   max-width: 100%;
   overflow-x: hidden;
+}
+
+/* ─── Custom Shadow / Glow utilities ────────────────────────────────────── */
+/* Referenced via Tailwind's arbitrary class or direct CSS class            */
+.shadow-glow-orange {
+  box-shadow: 0 0 18px -4px rgba(249, 115, 22, 0.45);
+}
+
+.shadow-glow-green {
+  box-shadow: 0 0 18px -4px rgba(16, 185, 129, 0.45);
+}
+
+.shadow-card-hover {
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.shadow-sidebar {
+  box-shadow: 4px 0 24px -4px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── iOS safe-area helpers ─────────────────────────────────────────────── */
+.pt-safe {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+
+.pb-safe {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+.pl-safe {
+  padding-left: max(0px, env(safe-area-inset-left));
+}
+
+.pr-safe {
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+
+/* ─── Modal mobile safety ───────────────────────────────────────────────── */
+/* Clamp modal height so it never overflows on short viewports (e.g. 568px) */
+.modal-body {
+  max-height: min(70vh, calc(100dvh - 180px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Prevent double tap zoom on buttons (Android Chrome) ──────────────── */
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* ─── Tab highlight removal (Samsung/Android) ───────────────────────────── */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* ─── Theme Transition Helper ────────────────────────────────────────────── */
+/* Apply to any element that should animate smoothly on theme change          */
+.transition-theme {
+  transition:
+    background-color 0.25s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* ─── Light Theme: global overrides for elements with hardcoded dark styles  */
+/* These selectors only activate when .theme-light is on <html>               */
+.theme-light .shadow-sidebar {
+  box-shadow: 4px 0 24px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Divider / border lines in light mode */
+.theme-light .border-gray-800\/60,
+.theme-light .border-gray-800\/50 {
+  border-color: rgba(0, 0, 0, 0.09);
+}
+
+/* Card backgrounds in light mode — Tailwind bg-gray-800 class override */
+.theme-light .bg-gray-800 {
+  background-color: #ffffff !important;
+}
+
+.theme-light .bg-gray-800\/60 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.theme-light .bg-gray-800\/80 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Nav / table row hover in light mode */
+.theme-light .hover\:bg-gray-700\/30:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.theme-light .hover\:bg-gray-700\/40:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Gray-900 section headers in light mode */
+.theme-light .bg-gray-900\/40 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Table dividers */
+.theme-light .divide-gray-700\/40>*+* {
+  border-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Sidebar bg-[#1a2744] user profile block */
+.theme-light .bg-\[\#1a2744\] {
+  background-color: #f1f5f9 !important;
+}
+
+/* Text color overrides — white text needs to flip to dark in light mode */
+.theme-light .text-white {
+  color: var(--theme-text-main) !important;
+}
+
+.theme-light .text-gray-100 {
+  color: #1e293b !important;
+}
+
+.theme-light .text-gray-400 {
+  color: #475569 !important;
+}
+
+.theme-light .text-gray-500 {
+  color: #64748b !important;
 }

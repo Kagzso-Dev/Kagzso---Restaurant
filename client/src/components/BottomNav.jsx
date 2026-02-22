@@ -1,16 +1,16 @@
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import {
     LayoutDashboard, Utensils, ChefHat, Monitor,
-    ClipboardList, Settings
+    ClipboardList, Settings, Package
 } from 'lucide-react';
 
 /**
  * Mobile-only Bottom Navigation Bar
  * Visible only on screens < 1025px (hidden via CSS on desktop)
  */
-const BottomNav = () => {
+const BottomNav = memo(() => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -44,8 +44,9 @@ const BottomNav = () => {
         }
         if (user.role === 'waiter') {
             return [
-                { to: '/waiter', icon: Utensils, label: 'Orders' },
-                { to: '/waiter/new-order', icon: LayoutDashboard, label: 'New Order' },
+                { to: '/waiter', icon: LayoutDashboard, label: 'Dashboard' },
+                { to: '/dine-in', icon: Utensils, label: 'Dine In' },
+                { to: '/take-away', icon: Package, label: 'Take Away' },
                 { to: '/waiter/kitchen-view', icon: ChefHat, label: 'Kitchen' },
             ];
         }
@@ -57,8 +58,8 @@ const BottomNav = () => {
     return (
         <nav className="
             lg:hidden fixed bottom-0 left-0 right-0 z-40
-            bg-[#0d1526]/95 backdrop-blur-lg
-            border-t border-gray-800/60
+            bg-[var(--theme-sidebar-bg)]/95 backdrop-blur-lg
+            border-t border-[var(--theme-border)]
             flex items-stretch
             bottom-nav-safe
             shadow-[0_-4px_24px_-6px_rgba(0,0,0,0.5)]
@@ -74,7 +75,7 @@ const BottomNav = () => {
                             py-2 gap-1 min-h-[56px] transition-colors duration-200
                             ${active
                                 ? 'text-orange-400'
-                                : 'text-gray-500 hover:text-gray-300'
+                                : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] transition-colors'
                             }
                         `}
                         aria-label={label}
@@ -95,7 +96,6 @@ const BottomNav = () => {
             })}
         </nav>
     );
-};
+});
 
 export default BottomNav;
-

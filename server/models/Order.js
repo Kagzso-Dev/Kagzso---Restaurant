@@ -35,8 +35,13 @@ const orderSchema = new mongoose.Schema({
     },
     paymentStatus: {
         type: String,
-        enum: ['pending', 'paid'],
+        enum: ['pending', 'payment_pending', 'paid'],
         default: 'pending'
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['cash', 'qr', 'upi', 'credit_card'],
+        default: null,
     },
     kotStatus: {
         type: String,
@@ -51,13 +56,37 @@ const orderSchema = new mongoose.Schema({
     // Multi-tenant fields
     tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: true, index: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true, index: true },
+
+    // Analytics Tracking Fields
+    waiterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+    prepStartedAt: { type: Date },
+    readyAt: { type: Date },
+    completedAt: { type: Date },
+    paymentAt: { type: Date },
+
     cancelledBy: { type: String, enum: ['WAITER', 'KITCHEN', 'ADMIN'] },
     cancelReason: { type: String },
 }, { timestamps: true });
 
+// Analytics-specific indexes for scalability
+orderSchema.index({ branchId: 1, createdAt: -1 });
+orderSchema.index({ tenantId: 1, createdAt: -1 });
+orderSchema.index({ waiterId: 1, createdAt: -1 });
+orderSchema.index({ branchId: 1, orderStatus: 1, createdAt: -1 });
+
 // Compound index for fast tenant+branch order queries
 orderSchema.index({ tenantId: 1, branchId: 1, orderStatus: 1 });
 orderSchema.index({ tenantId: 1, branchId: 1, createdAt: -1 });
+// Kitchen: fast open KOT lookup
+orderSchema.index({ tenantId: 1, branchId: 1, kotStatus: 1 });
+// Table history: fast lookup by table
+orderSchema.index({ tenantId: 1, branchId: 1, tableId: 1 });
+// Search: fast lookup by orderNumber
+orderSchema.index({ tenantId: 1, branchId: 1, orderNumber: 1 });
+// Search: text index for order number + customer name (MongoDB text search)
+orderSchema.index({ orderNumber: 'text', 'customerInfo.name': 'text' });
+// Growth: fast revenue aggregation by paymentStatus + date
+orderSchema.index({ tenantId: 1, branchId: 1, paymentStatus: 1, createdAt: -1 });
 
 // Auto-increment Token Number per tenant+branch
 orderSchema.pre('save', async function () {

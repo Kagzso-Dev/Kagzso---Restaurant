@@ -14,7 +14,8 @@ const WorkingProcess = () => {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             // Filter active working process orders
-            setOrders(res.data.filter(o => ['pending', 'preparing', 'accepted', 'ready'].includes(o.orderStatus)));
+            const ordersArray = res.data.orders || [];
+            setOrders(ordersArray.filter(o => ['pending', 'preparing', 'accepted', 'ready'].includes(o.orderStatus)));
         };
 
         if (user) {

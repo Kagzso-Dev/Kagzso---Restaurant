@@ -45,10 +45,10 @@ const Layout = () => {
     // ── Auth Guards ──────────────────────────────────────────────────────────
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-[#0f172a]">
+            <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--theme-bg-dark)' }}>
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-14 h-14 border-[3px] border-orange-500 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-gray-400 text-sm font-medium tracking-wide">Loading...</p>
+                    <p className="text-[var(--theme-text-muted)] text-sm font-medium tracking-wide">Loading...</p>
                 </div>
             </div>
         );
@@ -59,7 +59,7 @@ const Layout = () => {
     }
 
     return (
-        <div className="flex h-screen bg-[#0f172a] text-gray-100 font-sans overflow-hidden">
+        <div className="flex h-screen text-[var(--theme-text-main)] font-sans overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-dark)' }}>
 
             {/* ── Mobile / Tablet: Overlay backdrop when drawer open ─────── */}
             {drawerOpen && (

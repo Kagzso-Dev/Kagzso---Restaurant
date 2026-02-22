@@ -77,6 +77,11 @@ const superAdminOnly = (req, res, next) => {
  * requireTenant - Ensures tenantId is present (blocks superadmin-only tokens from tenant routes).
  */
 const requireTenant = (req, res, next) => {
+    // SuperAdmin bypasses tenant requirement (they act as global root)
+    if (req.role === 'superadmin') {
+        return next();
+    }
+
     if (!req.tenantId) {
         return res.status(403).json({ message: 'Tenant context required' });
     }

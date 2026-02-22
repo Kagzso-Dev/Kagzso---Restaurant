@@ -106,29 +106,42 @@ const updateTable = async (req, res) => {
 // @desc    Reserve a table (Waiter only)
 // @route   PUT /api/tables/:id/reserve
 // @access  Private (Waiter, Admin)
+// ⚠ Uses findOneAndUpdate with status:'available' filter for atomic reservation.
+// If two waiters submit simultaneously, only one will match and succeed.
 const reserveTable = async (req, res) => {
     try {
-        const table = await Table.findOne({
-            _id: req.params.id,
-            tenantId: req.tenantId,
-            branchId: req.branchId,
-        });
+        // Atomic: find the table ONLY if it is still 'available' and belongs to this branch
+        const table = await Table.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                tenantId: req.tenantId,
+                branchId: req.branchId,
+                status: 'available', // ← race-condition guard: only one concurrent request wins
+            },
+            {
+                $set: {
+                    status: 'reserved',
+                    lockedBy: req.user._id,
+                    reservedAt: new Date(),
+                },
+            },
+            { new: true } // return the updated document
+        );
 
         if (!table) {
-            return res.status(404).json({ message: 'Table not found' });
-        }
-
-        // Double booking prevention
-        if (table.status !== 'available') {
+            // Either table doesn't exist OR it was just reserved by someone else
+            const existing = await Table.findOne({
+                _id: req.params.id,
+                tenantId: req.tenantId,
+                branchId: req.branchId,
+            });
+            if (!existing) {
+                return res.status(404).json({ message: 'Table not found' });
+            }
             return res.status(400).json({
-                message: `Table is currently "${table.status}" and cannot be reserved`,
+                message: `Table is currently "${existing.status}" and cannot be reserved`,
             });
         }
-
-        table.status = 'reserved';
-        table.lockedBy = req.user._id;
-        table.reservedAt = new Date();
-        await table.save();
 
         req.app.get('socketio').to(`branch_${req.branchId}`).emit('table-updated', {
             tableId: table._id,

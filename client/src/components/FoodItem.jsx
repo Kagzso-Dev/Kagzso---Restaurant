@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
-const FoodItem = ({
+const FoodItem = memo(({
     item,
     viewMode,
     formatPrice,
@@ -14,29 +15,29 @@ const FoodItem = ({
 
     if (viewMode === 'list') {
         return (
-            <div className="group bg-[#131f35] rounded-2xl overflow-hidden border border-gray-700/50 hover:border-orange-500/50 transition-all p-3 flex items-center gap-4 animate-fade-in shadow-md">
+            <div className="group bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] hover:border-orange-500/50 transition-all p-3 flex items-center gap-4 animate-fade-in shadow-md">
                 {/* Image Section */}
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-800 flex-shrink-0">
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-[var(--theme-bg-dark)] flex-shrink-0">
                     {item.image
                         ? <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         : <div className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl">🍔</div>
                     }
-                    <div className={`absolute top-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-[#131f35] ring-1 ring-white/10 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                    <div className={`absolute top-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-card)] ring-1 ring-white/10 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                 </div>
 
                 {/* Info Section */}
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                         <div>
-                            <h3 className="text-sm sm:text-base font-bold text-white truncate leading-tight">{item.name}</h3>
-                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium uppercase tracking-wider mt-0.5">
+                            <h3 className="text-sm sm:text-base font-bold text-[var(--theme-text-main)] truncate leading-tight">{item.name}</h3>
+                            <p className="text-[10px] sm:text-xs text-[var(--theme-text-subtle)] font-medium uppercase tracking-wider mt-0.5">
                                 {item.category?.name || 'Category'}
                             </p>
                         </div>
                         <div className="flex flex-col items-start sm:items-end">
                             <span className="text-orange-400 font-black text-sm sm:text-base">{formatPrice(item.price)}</span>
                             {item.description && (
-                                <p className="text-[10px] text-gray-500 truncate max-w-[150px] hidden sm:block">
+                                <p className="text-[10px] text-[var(--theme-text-subtle)] truncate max-w-[150px] hidden sm:block">
                                     {item.description}
                                 </p>
                             )}
@@ -51,7 +52,7 @@ const FoodItem = ({
                             <>
                                 <button
                                     onClick={() => onEdit(item)}
-                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                                    className="p-2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)] rounded-lg transition-colors"
                                     title="Edit Item"
                                 >
                                     <Edit size={16} />
@@ -81,22 +82,22 @@ const FoodItem = ({
 
     // Grid View (Default)
     return (
-        <div className="group relative bg-[#131f35] rounded-2xl overflow-hidden border border-gray-700/50 hover:border-orange-500/50 transition-all p-3 text-left active:scale-[0.98] flex flex-col h-full shadow-md animate-fade-in transition-all">
-            <div className="relative h-24 sm:h-32 rounded-xl mb-3 overflow-hidden bg-gray-800">
+        <div className="group relative bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] hover:border-orange-500/50 transition-all p-3 text-left active:scale-[0.98] flex flex-col h-full shadow-md animate-fade-in">
+            <div className="relative h-24 sm:h-32 rounded-xl mb-3 overflow-hidden bg-[var(--theme-bg-dark)]">
                 {item.image
                     ? <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     : <div className="w-full h-full flex items-center justify-center text-3xl">🍔</div>
                 }
-                <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 border-[#131f35] ring-1 ring-white/10 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 border-[var(--theme-bg-card)] ring-1 ring-white/10 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
             </div>
 
             <div className="flex-1 flex flex-col">
-                <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1 mb-1">{item.name}</h3>
-                <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wider mb-2">
+                <h3 className="text-sm font-bold text-[var(--theme-text-main)] line-clamp-2 leading-tight flex-1 mb-1">{item.name}</h3>
+                <p className="text-[10px] text-[var(--theme-text-subtle)] font-medium uppercase tracking-wider mb-2">
                     {item.category?.name || 'Category'}
                 </p>
 
-                <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-700/50">
+                <div className="flex items-center justify-between mt-auto pt-2 border-t border-[var(--theme-border)]">
                     <span className="text-orange-400 font-black text-sm">{formatPrice(item.price)}</span>
 
                     {showActions && (
@@ -105,7 +106,7 @@ const FoodItem = ({
                                 <>
                                     <button
                                         onClick={() => onEdit(item)}
-                                        className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                                        className="p-1.5 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)] rounded-lg transition-colors"
                                     >
                                         <Edit size={14} />
                                     </button>
@@ -130,7 +131,7 @@ const FoodItem = ({
             </div>
         </div>
     );
-};
+});
 
 export default FoodItem;
 

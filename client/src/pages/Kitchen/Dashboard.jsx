@@ -187,7 +187,7 @@ const KitchenDashboard = () => {
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'cancelled'
     const [lastRefresh, setLastRefresh] = useState(new Date());
     const [cancelModal, setCancelModal] = useState({ isOpen: false, order: null, item: null });
-    const { user, socket, settings } = useContext(AuthContext);
+    const { user, socket, socketConnected, settings } = useContext(AuthContext);
 
     const fetchOrders = useCallback(async () => {
         try {
@@ -254,7 +254,10 @@ const KitchenDashboard = () => {
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || "Status update failed");
+        }
     };
 
     const updateItemStatus = async (orderId, itemId, newStatus) => {
@@ -263,7 +266,10 @@ const KitchenDashboard = () => {
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || "Item status update failed");
+        }
     };
 
     const handleCancelAction = async (orderId, arg2, arg3) => {
@@ -320,9 +326,13 @@ const KitchenDashboard = () => {
                     >
                         <RefreshCw size={17} />
                     </button>
-                    <div className="px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 font-bold hidden sm:block">
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1.5 animate-pulse" />
-                        Live
+                    <div className={`px-3 py-2 rounded-xl text-xs font-bold hidden sm:block border transition-colors ${socketConnected
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                        : 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400'
+                        }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full inline-block mr-1.5 ${socketConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-400'
+                            }`} />
+                        {socketConnected ? 'Live' : 'Reconnecting...'}
                     </div>
                 </div>
             </div>

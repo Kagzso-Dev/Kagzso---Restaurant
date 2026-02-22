@@ -15,12 +15,16 @@ const AdminTables = lazy(() => import('./pages/Admin/Tables'));
 const AdminCategories = lazy(() => import('./pages/Admin/Categories'));
 const AdminOrders = lazy(() => import('./pages/Admin/Orders'));
 const AdminSettings = lazy(() => import('./pages/Admin/Settings'));
+const AdminAnalytics = lazy(() => import('./pages/Admin/Analytics'));
+const AdminNotifications = lazy(() => import('./pages/Admin/Notifications'));
 const SuperAdminDashboard = lazy(() => import('./pages/SuperAdmin/Dashboard'));
 const KitchenDashboard = lazy(() => import('./pages/Kitchen/Dashboard'));
 const CashierDashboard = lazy(() => import('./pages/Cashier/Dashboard'));
 const WorkingProcess = lazy(() => import('./pages/Cashier/WorkingProcess'));
 const WaiterDashboard = lazy(() => import('./pages/Waiter/Dashboard'));
 const NewOrder = lazy(() => import('./pages/Waiter/NewOrder'));
+const DineIn = lazy(() => import('./pages/Waiter/DineIn'));
+const TakeAway = lazy(() => import('./pages/Waiter/TakeAway'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 
 /**
@@ -61,6 +65,8 @@ function App() {
                 <Route path="/admin/categories" element={<AdminCategories />} />
                 <Route path="/admin/orders" element={<AdminOrders />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/notifications" element={<AdminNotifications />} />
               </Route>
 
               {/* Kitchen Routes */}
@@ -79,6 +85,8 @@ function App() {
               <Route element={<WaiterRoute />}>
                 <Route path="/waiter" element={<WaiterDashboard />} />
                 <Route path="/waiter/new-order" element={<NewOrder />} />
+                <Route path="/dine-in" element={<DineIn />} />
+                <Route path="/take-away" element={<TakeAway />} />
                 <Route path="/waiter/working-process" element={<WorkingProcess />} />
                 <Route path="/waiter/kitchen-view" element={<KitchenDashboard />} />
               </Route>

@@ -26,6 +26,7 @@ router.route('/:id')
 // ── Table Lifecycle Endpoints ────────────────────────────────────────────────
 router.put('/:id/reserve', authorize('waiter', 'admin'), reserveTable);
 router.put('/:id/release', authorize('waiter', 'admin'), releaseTable);
+router.put('/:id/cancel-reservation', authorize('waiter', 'admin'), releaseTable); // alias for /release
 router.put('/:id/clean', authorize('waiter', 'admin'), markTableClean);
 router.put('/:id/force-reset', authorize('admin'), forceResetTable);
 

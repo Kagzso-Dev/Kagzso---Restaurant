@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
-import { PlusCircle, ChefHat, Grid, ShoppingBag, Clock, XCircle, History } from 'lucide-react';
+import { Utensils, Package, Grid, ShoppingBag, Clock, XCircle, History } from 'lucide-react';
 import TableGrid from '../../components/TableGrid';
 import CancelOrderModal from '../../components/CancelOrderModal';
 import OrderDetailsModal from '../../components/OrderDetailsModal';
@@ -20,13 +20,13 @@ const statusStyle = {
 const OrderCard = ({ order, formatPrice, onCancel }) => {
     const s = statusStyle[order.orderStatus] || statusStyle.pending;
     return (
-        <div className="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700/50 animate-fade-in hover:shadow-card-hover transition-all duration-300 flex flex-col group">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] animate-fade-in hover:shadow-card-hover transition-all duration-300 flex flex-col group">
             <div className={`h-1.5 ${s.bar}`} />
             <div className="p-4 flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-2 gap-2">
                     <div className="min-w-0 text-left">
-                        <h3 className="font-bold text-white text-base truncate">{order.orderNumber}</h3>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold mt-0.5">
+                        <h3 className="font-bold text-[var(--theme-text-main)] text-base truncate">{order.orderNumber}</h3>
+                        <p className="text-[10px] text-[var(--theme-text-subtle)] uppercase tracking-widest font-semibold mt-0.5">
                             {order.orderType === 'dine-in' ? `Table ${order.tableId?.number || order.tableId || '?'}` : `Token ${order.tokenNumber}`}
                         </p>
                     </div>
@@ -35,7 +35,7 @@ const OrderCard = ({ order, formatPrice, onCancel }) => {
                     </span>
                 </div>
 
-                <p className="text-sm text-gray-400 line-clamp-2 flex-1 text-left">
+                <p className="text-sm text-[var(--theme-text-muted)] line-clamp-2 flex-1 text-left">
                     {order.items?.map(i => `${i.quantity}× ${i.name}`).join(', ') || 'No items'}
                 </p>
 
@@ -45,8 +45,8 @@ const OrderCard = ({ order, formatPrice, onCancel }) => {
                     </div>
                 )}
 
-                <div className="flex justify-between items-center border-t border-gray-700/50 mt-3 pt-3">
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                <div className="flex justify-between items-center border-t border-[var(--theme-border)] mt-3 pt-3">
+                    <div className="flex items-center gap-1 text-xs text-[var(--theme-text-subtle)]">
                         <Clock size={11} />
                         {new Date(order.createdAt).toLocaleTimeString()}
                     </div>
@@ -60,7 +60,7 @@ const OrderCard = ({ order, formatPrice, onCancel }) => {
                                 <XCircle size={16} />
                             </button>
                         )}
-                        <span className="font-bold text-white">{formatPrice(order.finalAmount)}</span>
+                        <span className="font-bold text-[var(--theme-text-main)]">{formatPrice(order.finalAmount)}</span>
                     </div>
                 </div>
             </div>
@@ -71,6 +71,7 @@ const OrderCard = ({ order, formatPrice, onCancel }) => {
 /* ── Main Component ───────────────────────────────────────────────────────── */
 const WaiterDashboard = () => {
     const [orders, setOrders] = useState([]);
+    const [tables, setTables] = useState([]);
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'cancelled'
     const [showTables, setShowTables] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -78,6 +79,34 @@ const WaiterDashboard = () => {
     const [cancelModal, setCancelModal] = useState({ isOpen: false, order: null, item: null });
     const { user, socket, formatPrice } = useContext(AuthContext);
     const navigate = useNavigate();
+
+    // ── Reserve a table manually from the Table Map ───────────────────────────
+    const handleReserveTable = useCallback(async (tableId) => {
+        try {
+            const res = await api.put(
+                `/api/tables/${tableId}/reserve`,
+                {},
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            setTables(prev => prev.map(t => t._id === tableId ? res.data : t));
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to reserve table');
+        }
+    }, [user]);
+
+    // ── Cancel a reservation from the Table Map ───────────────────────────────
+    const handleCancelReservation = useCallback(async (tableId) => {
+        try {
+            const res = await api.put(
+                `/api/tables/${tableId}/release`,
+                {},
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            setTables(prev => prev.map(t => t._id === tableId ? res.data : t));
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to cancel reservation');
+        }
+    }, [user]);
 
     const fetchOrders = useCallback(async () => {
         try {
@@ -151,10 +180,10 @@ const WaiterDashboard = () => {
         <div className="space-y-5 animate-fade-in pb-10 text-left">
 
             {/* ── Header ─────────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-800/60 rounded-2xl p-4 sm:p-5 border border-gray-700/50">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--theme-bg-card2)] rounded-2xl p-4 sm:p-5 border border-[var(--theme-border)]">
                 <div>
-                    <h1 className="text-xl font-bold text-white">Waiter Console</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Manage live service and KOTs</p>
+                    <h1 className="text-xl font-bold text-[var(--theme-text-main)]">Waiter Console</h1>
+                    <p className="text-sm text-[var(--theme-text-subtle)] mt-0.5">Manage live service and KOTs</p>
                 </div>
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2">
@@ -164,7 +193,7 @@ const WaiterDashboard = () => {
                             flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all min-h-[44px]
                             ${showTables
                                 ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                                : 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white'
+                                : 'bg-[var(--theme-bg-hover)] hover:bg-[var(--theme-border)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] border border-[var(--theme-border)]'
                             }
                         `}
                     >
@@ -172,28 +201,35 @@ const WaiterDashboard = () => {
                         <span>Table Map</span>
                     </button>
                     <button
-                        onClick={() => navigate('/waiter/new-order')}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl font-bold text-sm transition-colors shadow-glow-orange min-h-[44px]"
+                        onClick={() => navigate('/dine-in')}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 hover:scale-105 text-white rounded-xl font-bold text-sm transition-all shadow-glow-orange min-h-[44px]"
                     >
-                        <PlusCircle size={17} />
-                        <span>New Order</span>
+                        <Utensils size={17} />
+                        <span>Dine In</span>
+                    </button>
+                    <button
+                        onClick={() => navigate('/take-away')}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 hover:scale-105 text-white rounded-xl font-bold text-sm transition-all min-h-[44px]"
+                    >
+                        <Package size={17} />
+                        <span>Take Away</span>
                     </button>
                 </div>
             </div>
 
             {/* ── Tabs & Counters ─────────────────────────────────────── */}
             <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 p-1.5 bg-gray-800/50 rounded-2xl border border-gray-700/50 w-full sm:w-fit">
+                <div className="flex items-center gap-2 p-1.5 bg-[var(--theme-bg-hover)] rounded-2xl border border-[var(--theme-border)] w-full sm:w-fit">
                     <button
                         onClick={() => setActiveTab('active')}
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)]'}`}
                     >
                         <ShoppingBag size={16} />
                         Active ({counts.pending + counts.preparing + counts.ready})
                     </button>
                     <button
                         onClick={() => setActiveTab('cancelled')}
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'cancelled' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'cancelled' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)]'}`}
                     >
                         <History size={16} />
                         Cancelled ({counts.cancelled})
@@ -220,12 +256,14 @@ const WaiterDashboard = () => {
 
             {/* ── Table Map (collapsible) ──────────────────────────── */}
             {showTables && (
-                <div className="bg-gray-800/60 p-4 sm:p-5 rounded-2xl border border-gray-700/50 animate-fade-in">
-                    <h2 className="text-base font-bold text-white mb-4">Table Status Overview</h2>
+                <div className="bg-[var(--theme-bg-card)] p-4 sm:p-5 rounded-2xl border border-[var(--theme-border)] animate-fade-in">
+                    <h2 className="text-base font-bold text-[var(--theme-text-main)] mb-4">Table Status Overview</h2>
                     <TableGrid
                         allowedStatuses={['available']}
                         showCleanAction={true}
                         onSelectTable={() => navigate('/waiter/new-order')}
+                        onReserve={handleReserveTable}
+                        onCancelReservation={handleCancelReservation}
                     />
                 </div>
             )}
@@ -236,17 +274,17 @@ const WaiterDashboard = () => {
                     {Array(6).fill(0).map((_, i) => <div key={i} className="skeleton rounded-2xl h-48" />)}
                 </div>
             ) : filteredOrders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                <div className="flex flex-col items-center justify-center py-20 text-[var(--theme-text-subtle)]">
                     {activeTab === 'active' ? (
                         <>
                             <ShoppingBag size={52} className="mb-3 opacity-20" />
-                            <h3 className="text-lg font-bold text-gray-400">No active orders</h3>
+                            <h3 className="text-lg font-bold text-[var(--theme-text-muted)]">No active orders</h3>
                             <p className="text-sm mt-1">Tap "New Order" to create one</p>
                         </>
                     ) : (
                         <>
                             <History size={52} className="mb-3 opacity-20" />
-                            <h3 className="text-lg font-bold text-gray-400">No cancelled orders</h3>
+                            <h3 className="text-lg font-bold text-[var(--theme-text-muted)]">No cancelled orders</h3>
                             <p className="text-sm mt-1">Hooray! No wastage today.</p>
                         </>
                     )}

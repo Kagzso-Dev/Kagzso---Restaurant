@@ -1,10 +1,11 @@
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ThemeSwitcher from './ThemeSwitcher';
 import {
     LogOut, LayoutDashboard, Monitor, Utensils, ChefHat,
     Layers, Coffee, Grid, Settings, ClipboardList, ChevronLeft,
-    ChevronRight, X
+    ChevronRight, X, TrendingUp, Bell
 } from 'lucide-react';
 
 /**
@@ -36,7 +37,7 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
     };
 
     /* ── NavItem ─────────────────────────────────────────────────────── */
-    const NavItem = ({ to, icon: Icon, label, color = 'text-gray-400', badge }) => {
+    const NavItem = ({ to, icon: Icon, label, color = 'text-[var(--theme-text-muted)]', badge }) => {
         const active = isActive(to);
         return (
             <button
@@ -46,14 +47,14 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
                     w-full flex items-center rounded-xl transition-all duration-200 group relative
                     ${collapsed ? 'justify-center px-0 py-3' : 'space-x-3 px-4 py-3'}
                     ${active
-                        ? 'bg-gradient-to-r from-orange-500/20 to-orange-600/5 text-white border-l-4 border-orange-500'
-                        : 'hover:bg-white/5 text-gray-400 hover:text-white border-l-4 border-transparent'
+                        ? 'bg-gradient-to-r from-orange-500/20 to-orange-600/5 text-[var(--theme-text-main)] border-l-4 border-orange-500'
+                        : 'hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] border-l-4 border-transparent'
                     }
                 `}
             >
                 <Icon
                     size={20}
-                    className={`flex-shrink-0 transition-colors ${active ? 'text-orange-400' : color} group-hover:text-white`}
+                    className={`flex-shrink-0 transition-colors ${active ? 'text-orange-400' : color} group-hover:text-[var(--theme-text-main)]`}
                 />
                 {!collapsed && (
                     <span className="font-medium text-sm tracking-wide truncate">{label}</span>
@@ -66,9 +67,9 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
                 {/* Tooltip for collapsed mode */}
                 {collapsed && (
                     <span className="
-                        absolute left-full ml-3 px-2 py-1 bg-gray-800 text-white text-xs
+                        absolute left-full ml-3 px-2 py-1 bg-[var(--theme-bg-card)] text-[var(--theme-text-main)] text-xs
                         rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100
-                        pointer-events-none transition-opacity shadow-lg border border-gray-700
+                        pointer-events-none transition-opacity shadow-lg border border-[var(--theme-border)]
                         z-50
                     ">
                         {label}
@@ -80,22 +81,21 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
 
     /* ── Section Label ───────────────────────────────────────────────── */
     const SectionLabel = ({ children }) => !collapsed ? (
-        <div className="px-4 pt-5 pb-1.5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+        <div className="px-4 pt-5 pb-1.5 text-[9px] font-bold text-[var(--theme-text-subtle)] uppercase tracking-widest">
             {children}
         </div>
     ) : (
-        <div className="my-2 h-px bg-gray-800 mx-3" />
+        <div className="my-2 h-px bg-[var(--theme-border)] mx-3" />
     );
 
     return (
-        <div className={`
-            h-full bg-[#0d1526] text-white flex flex-col
-            border-r border-gray-800/60 shadow-sidebar
-            transition-width duration-300 overflow-hidden
-        `}>
+        <div
+            className="h-full text-[var(--theme-text-main)] flex flex-col border-r border-[var(--theme-border)] shadow-sidebar transition-width duration-300 overflow-hidden"
+            style={{ backgroundColor: 'var(--theme-sidebar-bg)' }}
+        >
 
             {/* ── Header ─────────────────────────────────────────────── */}
-            <div className={`flex items-center border-b border-gray-800/50 flex-shrink-0 ${collapsed ? 'justify-center p-4' : 'px-5 py-5 space-x-3'}`}>
+            <div className={`flex items-center border-b border-[var(--theme-border)] flex-shrink-0 ${collapsed ? 'justify-center p-4' : 'px-5 py-5 space-x-3'}`}>
                 {/* Logo / Brand */}
                 <div
                     onClick={() => handleNav('/')}
@@ -111,10 +111,10 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
 
                 {!collapsed && (
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-base font-bold tracking-wide text-white truncate leading-tight">
+                        <h1 className="text-base font-bold tracking-wide text-[var(--theme-text-main)] truncate leading-tight">
                             {settings?.restaurantName || 'Restaurant'}
                         </h1>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                        <p className="text-[9px] text-[var(--theme-text-subtle)] font-bold uppercase tracking-widest mt-0.5">
                             Management POS
                         </p>
                     </div>
@@ -124,7 +124,7 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
                 {!collapsed && onClose && (
                     <button
                         onClick={onClose}
-                        className="lg:hidden flex-shrink-0 p-1.5 text-gray-500 hover:text-white hover:bg-gray-700 rounded-lg"
+                        className="lg:hidden flex-shrink-0 p-1.5 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)] rounded-lg"
                         aria-label="Close menu"
                     >
                         <X size={18} />
@@ -135,12 +135,12 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
             {/* ── User Profile ────────────────────────────────────────── */}
             {!collapsed && (
                 <div className="px-4 py-3 flex-shrink-0">
-                    <div className="bg-[#1a2744] rounded-xl p-3 border border-gray-700/40 flex items-center space-x-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0 ring-2 ring-gray-800">
+                    <div className="bg-[var(--theme-bg-muted)] rounded-xl p-3 border border-[var(--theme-border)] flex items-center space-x-3">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0 ring-2 ring-[var(--theme-bg-dark)]">
                             {user.username?.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-white truncate">{user.username}</p>
+                            <p className="text-sm font-bold text-[var(--theme-text-main)] truncate">{user.username}</p>
                             <p className="text-xs text-orange-400 font-medium capitalize truncate">{user.role}</p>
                         </div>
                     </div>
@@ -164,6 +164,8 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
                         <SectionLabel>Admin Console</SectionLabel>
                         <NavItem to="/admin" icon={LayoutDashboard} label="Dashboard" />
                         <NavItem to="/admin/orders" icon={ClipboardList} label="Orders History" />
+                        <NavItem to="/admin/analytics" icon={TrendingUp} label="Analytics" color="text-emerald-400" />
+                        <NavItem to="/admin/notifications" icon={Bell} label="Notifications" color="text-orange-400" />
                         <NavItem to="/admin/menu" icon={Coffee} label="Menu Items" />
                         <NavItem to="/admin/categories" icon={Layers} label="Categories" />
                         <NavItem to="/admin/tables" icon={Grid} label="Table Map" />
@@ -204,15 +206,20 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, onClose }) => {
             {onToggleCollapse && (
                 <button
                     onClick={onToggleCollapse}
-                    className="hidden lg:flex items-center justify-center p-3 border-t border-gray-800/50 text-gray-500 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
+                    className="hidden lg:flex items-center justify-center p-3 border-t border-[var(--theme-border)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-main)] hover:bg-[var(--theme-bg-hover)] transition-colors flex-shrink-0"
                     title={collapsed ? 'Expand' : 'Collapse'}
                 >
                     {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                 </button>
             )}
 
+            {/* ── Theme Switcher ───────────────────────────────────────── */}
+            <div className={`px-3 pb-1 border-t border-[var(--theme-border)] pt-3 flex-shrink-0 ${collapsed ? 'flex justify-center' : ''}`}>
+                <ThemeSwitcher collapsed={collapsed} />
+            </div>
+
             {/* ── Sign Out ─────────────────────────────────────────────── */}
-            <div className={`p-3 border-t border-gray-800/50 flex-shrink-0 ${collapsed ? 'flex justify-center' : ''}`}>
+            <div className={`p-3 border-t border-[var(--theme-border)] flex-shrink-0 ${collapsed ? 'flex justify-center' : ''}`}>
                 <button
                     onClick={handleLogout}
                     title={collapsed ? 'Sign Out' : undefined}

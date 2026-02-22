@@ -1,5 +1,7 @@
 const Order = require('../models/Order');
 const Table = require('../models/Table');
+const { createAndEmitNotification } = require('./notificationController');
+const { invalidateCache } = require('../utils/cache');
 
 // @desc    Get all orders (filtered by tenant + branch)
 // @route   GET /api/orders
@@ -89,6 +91,7 @@ const createOrder = async (req, res) => {
             // Auto-attach from JWT — no client can fake this
             tenantId: req.tenantId,
             branchId: req.branchId,
+            waiterId: req.userId, // Track which waiter/user created this order
         });
 
         // If Dine-In, validate table status before creating order
@@ -135,6 +138,23 @@ const createOrder = async (req, res) => {
         const room = `branch_${req.branchId}`;
         req.app.get('socketio').to(room).emit('new-order', createdOrder);
 
+        // ── Auto-notify kitchen: NEW_ORDER ──
+        createAndEmitNotification(req.app.get('socketio'), {
+            title: `New Order #${createdOrder.orderNumber}`,
+            message: `${createdOrder.items.length} item(s) — ${createdOrder.orderType === 'dine-in' ? 'Dine-In' : 'Takeaway'}`,
+            type: 'NEW_ORDER',
+            roleTarget: 'kitchen',
+            referenceId: createdOrder._id,
+            referenceType: 'order',
+            tenantId: req.tenantId,
+            branchId: req.branchId,
+            createdBy: req.userId,
+        });
+
+        // ── Cache: Invalidate dashboard/analytics ──
+        invalidateCache('dashboard');
+        invalidateCache('analytics');
+
         res.status(201).json(createdOrder);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -166,7 +186,7 @@ const updateOrderStatus = async (req, res) => {
         }
 
         if (status === 'cancelled') {
-            if (order.orderStatus === 'preparing' && req.role !== 'admin') {
+            if (['preparing', 'ready'].includes(order.orderStatus) && !['admin', 'superadmin'].includes(req.role)) {
                 return res.status(403).json({ message: 'Only admin can cancel after preparation starts' });
             }
         }
@@ -195,11 +215,39 @@ const updateOrderStatus = async (req, res) => {
             }
         }
 
+        // Analytics: Track status transition timestamps
+        if (status === 'preparing' && !order.prepStartedAt) {
+            order.prepStartedAt = new Date();
+        } else if (status === 'ready' && !order.readyAt) {
+            order.readyAt = new Date();
+        } else if (status === 'completed' && !order.completedAt) {
+            order.completedAt = new Date();
+        }
+
         order.orderStatus = status;
         const updatedOrder = await order.save();
 
         const room = `branch_${req.branchId}`;
         req.app.get('socketio').to(room).emit('order-updated', updatedOrder);
+
+        // ── Auto-notify waiter: ORDER_READY ──
+        if (status === 'ready') {
+            createAndEmitNotification(req.app.get('socketio'), {
+                title: `Order #${order.orderNumber} Ready`,
+                message: `Order is ready for pickup/serving`,
+                type: 'ORDER_READY',
+                roleTarget: 'waiter',
+                referenceId: order._id,
+                referenceType: 'order',
+                tenantId: req.tenantId,
+                branchId: req.branchId,
+                createdBy: req.userId,
+            });
+        }
+
+        // ── Cache: Invalidate dashboard/analytics ──
+        invalidateCache('dashboard');
+        invalidateCache('analytics');
 
         res.json(updatedOrder);
     } catch (error) {
@@ -241,6 +289,10 @@ const updateItemStatus = async (req, res) => {
         req.app.get('socketio').to(room).emit('itemUpdated', order);
         req.app.get('socketio').to(room).emit('order-updated', order);
 
+        // ── Cache: Invalidate dashboard/analytics ──
+        invalidateCache('dashboard');
+        invalidateCache('analytics');
+
         res.json(order);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -274,10 +326,19 @@ const processPayment = async (req, res) => {
             });
         }
 
+        // ── Kitchen-completion gate: block unless order is ready ──
+        if (order.orderStatus !== 'ready') {
+            return res.status(400).json({
+                message: 'Payment not allowed. Kitchen process not completed.',
+            });
+        }
+
         // Auto-Close: Payment triggers full completion
         order.paymentStatus = 'paid';
         order.orderStatus = 'completed';
         order.kotStatus = 'Closed';
+        order.paymentAt = new Date();
+        order.completedAt = order.completedAt || new Date();
 
         await order.save();
 
@@ -310,6 +371,10 @@ const processPayment = async (req, res) => {
             message: 'Payment successful & token closed',
             order,
         });
+
+        // ── Cache: Invalidate dashboard/analytics ──
+        invalidateCache('dashboard');
+        invalidateCache('analytics');
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -348,9 +413,11 @@ const cancelOrder = async (req, res) => {
             if (!['pending', 'accepted', 'preparing'].includes(order.orderStatus)) {
                 return res.status(403).json({ message: 'Kitchen can only cancel orders that are pending or being prepared' });
             }
-        } else {
-            return res.status(403).json({ message: 'Only Waiter or Kitchen roles can cancel orders' });
+        } else if (!['admin', 'superadmin'].includes(req.role)) {
+            // Cashier or other roles
+            return res.status(403).json({ message: 'Your role is not authorized to cancel orders' });
         }
+        // Admin and SuperAdmin can cancel anytime
 
         order.orderStatus = 'cancelled';
         order.kotStatus = 'Closed';
@@ -384,6 +451,10 @@ const cancelOrder = async (req, res) => {
         // Emit required socket events
         req.app.get('socketio').to(room).emit('orderCancelled', updatedOrder);
         req.app.get('socketio').to(room).emit('order-updated', updatedOrder);
+
+        // ── Cache: Invalidate dashboard/analytics ──
+        invalidateCache('dashboard');
+        invalidateCache('analytics');
 
         res.json(updatedOrder);
     } catch (error) {
@@ -426,7 +497,7 @@ const cancelOrderItem = async (req, res) => {
                 return res.status(403).json({ message: 'Waiters cannot cancel items that are preparing or ready' });
             }
         }
-        // Kitchen can cancel anytime (no additional blocks)
+        // Kitchen, Admin, and SuperAdmin can cancel anytime
 
 
         // Update item fields
@@ -487,9 +558,72 @@ const cancelOrderItem = async (req, res) => {
     }
 };
 
+// @desc    Search orders by orderNumber, customerName, or tableNumber
+// @route   GET /api/orders/search?q=<query>
+// @access  Private (admin, cashier, waiter)
+const searchOrders = async (req, res) => {
+    try {
+        const q = (req.query.q || '').trim();
+        if (!q) {
+            return res.json({ orders: [] });
+        }
+
+        // Escape special regex characters to prevent injection
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'i');
+
+        // Base tenant+branch filter — always enforced
+        const baseFilter = {
+            tenantId: req.tenantId,
+            branchId: req.branchId,
+        };
+
+        // Multi-field regex search
+        // Table search: Convert Number field to String for regex matching using aggregation
+        const matchingTables = await Table.aggregate([
+            {
+                $match: {
+                    tenantId: new mongoose.Types.ObjectId(req.tenantId),
+                    branchId: new mongoose.Types.ObjectId(req.branchId),
+                }
+            },
+            {
+                $addFields: {
+                    numberString: { $toString: "$number" }
+                }
+            },
+            {
+                $match: {
+                    numberString: { $regex: regex }
+                }
+            },
+            { $project: { _id: 1 } }
+        ]);
+        const tableIds = matchingTables.map(t => t._id);
+
+        const orders = await Order.find({
+            ...baseFilter,
+            $or: [
+                { orderNumber: { $regex: regex } },
+                { 'customerInfo.name': { $regex: regex } },
+                ...(tableIds.length ? [{ tableId: { $in: tableIds } }] : []),
+            ],
+        })
+            .sort({ createdAt: -1 })
+            .limit(30)
+            .populate('tableId', 'number')
+            .lean();
+
+        res.json({ orders });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createOrder,
     getOrders,
+    searchOrders,
     updateOrderStatus,
     updateItemStatus,
     processPayment,
