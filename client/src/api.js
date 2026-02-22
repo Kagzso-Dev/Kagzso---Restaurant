@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Get API URL from environment (Netlify) or fallback to local
 const baseURL = (
-    import.meta.env.VITE_API_URL || "http://localhost:5000"
+    import.meta.env.VITE_API_URL || "http://localhost:5005"
 ).replace(/\/+$/, "");
 
 // Create axios instance

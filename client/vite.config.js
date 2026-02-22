@@ -24,8 +24,6 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('lucide-react') || id.includes('socket.io-client')) {
               return 'vendor-ui';
             }
-            // Default vendor chunk
-            return 'vendor';
           }
         },
       },

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../api';
-import { Search, Filter, Eye, XCircle, ShoppingBag, History } from 'lucide-react';
+import { Search, Eye, ShoppingBag } from 'lucide-react';
 import OrderDetailsModal from '../../components/OrderDetailsModal';
 
 const AdminOrders = () => {
@@ -58,6 +58,26 @@ const AdminOrders = () => {
 
         setFilteredOrders(temp);
     }, [orders, filterStatus, searchQuery]);
+
+    const handleProcessPayment = async (order) => {
+        if (!window.confirm(`Process payment of ${formatPrice(order.finalAmount)} for ${order.orderNumber}?`)) return;
+
+        try {
+            const res = await api.put(`/api/orders/${order._id}/payment`, {
+                paymentMethod: 'cash',
+                amountPaid: order.finalAmount
+            });
+
+            if (res.data.success) {
+                const updatedOrder = res.data.order;
+                setOrders(prev => prev.map(o => o._id === updatedOrder._id ? updatedOrder : o));
+                setSelectedOrder(updatedOrder);
+            }
+        } catch (error) {
+            console.error("Payment error:", error);
+            alert("Failed to process payment");
+        }
+    };
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -185,11 +205,10 @@ const AdminOrders = () => {
                 order={selectedOrder}
                 onClose={() => setSelectedOrder(null)}
                 formatPrice={formatPrice}
-                userRole={user.role}
+                onProcessPayment={handleProcessPayment}
             />
         </div>
     );
 };
 
 export default AdminOrders;
-
