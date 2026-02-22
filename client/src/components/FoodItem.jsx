@@ -15,7 +15,10 @@ const FoodItem = memo(({
 
     if (viewMode === 'list') {
         return (
-            <div className="group bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] hover:border-orange-500/50 transition-all p-3 flex items-center gap-4 animate-fade-in shadow-md">
+            <div
+                onClick={() => { if (!isAdmin && showActions) onAdd(item); }}
+                className="group bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] hover:border-orange-500/50 transition-all p-3 flex items-center gap-4 animate-fade-in shadow-md cursor-pointer"
+            >
                 {/* Image Section */}
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-[var(--theme-bg-dark)] flex-shrink-0">
                     {item.image
@@ -67,7 +70,7 @@ const FoodItem = memo(({
                             </>
                         ) : (
                             <button
-                                onClick={() => onAdd(item)}
+                                onClick={(e) => { e.stopPropagation(); onAdd(item); }}
                                 className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all active:scale-95 shadow-lg group-hover:shadow-orange-500/20"
                                 title="Add to Cart"
                             >
@@ -82,7 +85,10 @@ const FoodItem = memo(({
 
     // Grid View (Default)
     return (
-        <div className="group relative bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] hover:border-orange-500/50 transition-all p-3 text-left active:scale-[0.98] flex flex-col h-full shadow-md animate-fade-in">
+        <div
+            onClick={() => { if (!isAdmin && showActions) onAdd(item); }}
+            className="group relative bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] hover:border-orange-500/50 transition-all p-3 text-left active:scale-[0.98] flex flex-col h-full shadow-md animate-fade-in cursor-pointer"
+        >
             <div className="relative h-24 sm:h-32 rounded-xl mb-3 overflow-hidden bg-[var(--theme-bg-dark)]">
                 {item.image
                     ? <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -119,7 +125,7 @@ const FoodItem = memo(({
                                 </>
                             ) : (
                                 <button
-                                    onClick={() => onAdd(item)}
+                                    onClick={(e) => { e.stopPropagation(); onAdd(item); }}
                                     className="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors active:scale-95"
                                 >
                                     <Plus size={16} />
