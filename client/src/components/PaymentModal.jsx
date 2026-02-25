@@ -64,6 +64,10 @@ const PaymentModal = ({ order, formatPrice, onClose, onSuccess, api }) => {
     const [transactionId, setTransactionId] = useState('');
     const [paidAmount, setPaidAmount] = useState('');
 
+    // UPI QR state
+    const [qrDataUrl, setQrDataUrl] = useState('');
+    const [qrGenerating, setQrGenerating] = useState(false);
+
     const modalRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -133,8 +137,47 @@ const PaymentModal = ({ order, formatPrice, onClose, onSuccess, api }) => {
         setTransactionId('');
         setPaidAmount(String(total));
         setChange(0);
+        setQrDataUrl('');
+        setQrGenerating(false);
         setStep('form');
     };
+
+    /* ── Build UPI deep-link string ───────────────────────────────── */
+    const buildUpiString = () => {
+        const pa = import.meta.env.VITE_MERCHANT_UPI || 'merchant@upi';
+        return (
+            `upi://pay?pa=${encodeURIComponent(pa)}` +
+            `&pn=${encodeURIComponent('Kagzso Restaurant')}` +
+            `&am=${total.toFixed(2)}` +
+            `&tn=${encodeURIComponent(order.orderNumber)}` +
+            `&cu=INR`
+        );
+    };
+
+    /* ── Generate QR when QR method is active ─────────────────────── */
+    useEffect(() => {
+        if (method?.id !== 'qr' || step !== 'form') return;
+        let cancelled = false;
+        setQrGenerating(true);
+        setQrDataUrl('');
+
+        (async () => {
+            try {
+                const { default: QRCode } = await import('qrcode');
+                const url = await QRCode.toDataURL(buildUpiString(), {
+                    width: 240,
+                    margin: 2,
+                    color: { dark: '#000000', light: '#FFFFFF' },
+                });
+                if (!cancelled) { setQrDataUrl(url); setQrGenerating(false); }
+            } catch {
+                if (!cancelled) setQrGenerating(false);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [method?.id, step]);
 
     /* ── Cash: calculate change ────────────────────────────────────── */
     useEffect(() => {
@@ -200,9 +243,6 @@ const PaymentModal = ({ order, formatPrice, onClose, onSuccess, api }) => {
             setStep('form');
         }
     };
-
-    /* ── QR Image URL (placeholder — replace with actual uploaded QR) */
-    const qrImageUrl = '/qr-payment.png';
 
     if (!order) return null;
 
@@ -395,29 +435,29 @@ const PaymentModal = ({ order, formatPrice, onClose, onSuccess, api }) => {
                             {/* ── QR Form ─────────────────────────── */}
                             {method.id === 'qr' && (
                                 <div className="space-y-4">
-                                    {/* QR Image */}
-                                    <div className="bg-white rounded-2xl p-6 flex flex-col items-center">
-                                        <img
-                                            src={qrImageUrl}
-                                            alt="Payment QR Code"
-                                            className="w-48 h-48 object-contain rounded-lg"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                e.target.nextSibling.style.display = 'flex';
-                                            }}
-                                        />
-                                        <div
-                                            className="w-48 h-48 bg-gray-100 rounded-lg items-center justify-center text-gray-400 text-sm text-center p-4"
-                                            style={{ display: 'none' }}
-                                        >
-                                            <QrCode size={48} className="mx-auto mb-2 text-gray-300" />
-                                            <p className="text-xs">QR image not found.</p>
-                                            <p className="text-[10px] mt-1">Place <code>qr-payment.png</code> in /public</p>
-                                        </div>
+                                    {/* Dynamic UPI QR */}
+                                    <div className="bg-white rounded-2xl p-5 flex flex-col items-center">
+                                        {qrGenerating ? (
+                                            <div className="w-48 h-48 flex items-center justify-center">
+                                                <Loader2 size={32} className="text-gray-400 animate-spin" />
+                                            </div>
+                                        ) : qrDataUrl ? (
+                                            <img src={qrDataUrl} alt="UPI Payment QR" className="w-48 h-48" />
+                                        ) : (
+                                            <div className="w-48 h-48 bg-gray-100 rounded-lg flex flex-col items-center justify-center gap-2">
+                                                <QrCode size={40} className="text-gray-300" />
+                                                <p className="text-xs text-gray-400 text-center px-2">
+                                                    Set VITE_MERCHANT_UPI in .env
+                                                </p>
+                                            </div>
+                                        )}
                                         <p className="mt-3 text-lg font-black text-gray-900">
                                             Pay {formatPrice(total)}
                                         </p>
-                                        <p className="text-xs text-gray-500">Scan to pay via any UPI app</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            {import.meta.env.VITE_MERCHANT_UPI || 'merchant@upi'}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">Scan with any UPI app</p>
                                     </div>
 
                                     {/* Transaction ID */}
